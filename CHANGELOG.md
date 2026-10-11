@@ -8,4 +8,5 @@ All notable changes to this project are documented here. The format follows
 
 ## [0.1.0]
 
-- First release.
+- First release: `quote`, `unquote`, `is_token` and `split_list` for the HTTP
+  quoted-string primitive (RFC 9110).
