@@ -13,7 +13,7 @@ Progress:
 - [x] Docs and packaging: README, CHANGELOG, metadata, sdist contents
 - [x] Gates: ruff format, ruff check, mypy --strict, pytest
 - [x] Mutation run: removing guarded logic makes the suite fail
-- [ ] Independent review findings fixed with regression tests
+- [x] Independent review findings fixed with regression tests
 - [ ] Pull request opened, guard clean
 
 ## Starting point
@@ -103,10 +103,33 @@ reference files fetched and checked against the manifest:
 
 - Gates: ruff format, ruff check, mypy --strict (src, and src with tests) and pytest
   exit 0; the installed-wheel test ran (`HTTPQUOTED_E2E=1`) and no test skipped.
-- Mutation run: 53 mutants, each removing or bending one guard (character classes, the
+- Mutation run: 60 mutants, each removing or bending one guard (character classes, the
   CR LF and DEL refusal, obs-text and `ascii_only`, quoted-pair checks, nesting depth,
   end offsets, strict trailing text, separator validation and escaping, comment mode,
-  element trimming, the bytes bridge, a quadratic split loop, CLI exit codes). The first
+  element trimming, the bytes bridge, a quadratic split loop, the CLI octet handling and
+  exit codes). The first
   pass left two alive (a quoted-pair of a line break in lenient `unquote`, and a `^`
   separator before a quoted-string); both have tests now and die. Baseline green before
   and after.
+
+## Independent review
+
+No high-severity findings. Fixed, each with a test in `tests/test_review_fixes.py`:
+
+- The command line read standard input with the locale codec and wrote with it, so
+  obs-text octets were mangled or crashed as a usage error; it now reads and writes
+  ISO-8859-1, splits lines only on LF (never on U+0085), and a value that is not an
+  octet exits 1 with a clear message instead of a usage error.
+- `split_list` took only a `str` separator; it now takes `str` or `bytes` and refuses a
+  separator that is not one field character (above U+00FF, a control, DEL).
+- With `ascii_only=True` the error pointed at a later control instead of the first
+  obs-text character; one character class now finds the first refused character.
+- The scanners accepted `True` as an offset; a non-int start raises `TypeError`.
+- Docs: what strict `split_list` checks (field content and every quoted-string and
+  comment, not the element grammar), the different lenient behaviour of `unquote` and
+  the scanners, comment values as display text (slice the raw comment with the end
+  offset to parse it again), C1 controls inside obs-text, the `TypeError` change in the
+  CHANGELOG.
+- Tests: the hostile matrix covers bytes and `quote_if_needed`, a misnamed test was
+  renamed, the em-dash walk skips ignored folders; the fetch script reports every file
+  that fails and `check.ps1` type-checks `scripts/`.
