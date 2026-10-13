@@ -8,9 +8,9 @@ Progress:
 - [x] Strict unquote and comment codec (nesting, quoted-pairs)
 - [x] List splitting: separator, comments, strict mode
 - [x] Bytes in, bytes out (ISO-8859-1) across the API
-- [ ] Command line
+- [x] Command line
 - [ ] Contracts: pinned sources, RFC examples, round trips, hostile input, README, installed wheel
-- [ ] Docs and packaging: README, CHANGELOG, metadata, sdist contents
+- [x] Docs and packaging: README, CHANGELOG, metadata, sdist contents
 - [ ] Gates: ruff format, ruff check, mypy --strict, pytest
 - [ ] Mutation run: removing guarded logic makes the suite fail
 - [ ] Independent review findings fixed with regression tests

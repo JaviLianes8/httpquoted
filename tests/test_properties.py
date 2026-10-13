@@ -12,7 +12,7 @@ import httpquoted as hq
 FIELD_TEXT = "\t" + "".join(chr(c) for c in [*range(0x20, 0x7F), *range(0x80, 0x100)])
 # Characters with a job in the grammar, weighted so most values contain several.
 MEANINGFUL = '"\\(),; \t'
-ANY = "".join(chr(c) for c in range(0x100)) + "Ā€"
+ANY = "".join(chr(c) for c in range(0x100)) + "\u0100\u20ac"
 ROUNDS = 400
 
 

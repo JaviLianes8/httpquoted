@@ -15,7 +15,7 @@ from conftest import rule, section
 
 import httpquoted as hq
 
-PROBE = [chr(c) for c in range(0x110)] + ["€", "￿"]
+PROBE = [chr(c) for c in range(0x110)] + ["\u20ac", "\uffff"]
 TERM = re.compile(r'%x([0-9A-Fa-f]+)(?:-([0-9A-Fa-f]+))?|"([^"]*)"|([A-Za-z][\w-]*)')
 
 
