@@ -3,10 +3,10 @@
 Progress:
 - [x] Brainstorm ranked improvements (this file)
 - [x] Pin the ground truth: RFC 9110, RFC 7230 and its errata, RFC 5234 core rules
-- [ ] Safe quoting: refuse CTLs, DEL and characters above U+00FF; optional ASCII-only mode
-- [ ] Scanner: quoted-string and comment scanners, strict and lenient, linear time
-- [ ] Strict unquote and comment codec (nesting, quoted-pairs)
-- [ ] List splitting: separator, comments, strict mode
+- [x] Safe quoting: refuse CTLs, DEL and characters above U+00FF; optional ASCII-only mode
+- [x] Scanner: quoted-string and comment scanners, strict and lenient, linear time
+- [x] Strict unquote and comment codec (nesting, quoted-pairs)
+- [x] List splitting: separator, comments, strict mode
 - [ ] Bytes in, bytes out (ISO-8859-1) across the API
 - [ ] Command line
 - [ ] Contracts: pinned sources, RFC examples, round trips, hostile input, README, installed wheel
