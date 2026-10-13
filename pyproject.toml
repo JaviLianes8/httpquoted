@@ -4,24 +4,37 @@ build-backend = "hatchling.build"
 
 [project]
 name = "httpquoted"
-version = "0.1.0"
-description = "Typed codec for the HTTP quoted-string primitive (RFC 9110): quote, unquote, token check and quote-aware list splitting"
+version = "0.2.0"
+description = "Strict, typed and zero-dependency codec for HTTP quoted-strings, comments and tokens (RFC 9110): safe quoting, strict parsing, scanners and quote-aware list splitting"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Javier Lianes", email = "javier@lianes8studio.com" }]
-keywords = []
+keywords = ["http", "header", "quoted-string", "quote", "unquote", "comment", "token", "field-value", "list", "parser", "rfc9110", "rfc7230"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+    "Environment :: Console",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
 dependencies = []
 
 [project.optional-dependencies]
 dev = ["ruff", "mypy", "pytest", "build", "twine"]
+
+[project.scripts]
+httpquoted = "httpquoted._cli:main"
 
 [project.urls]
 Homepage = "https://lianes8studio.com"
@@ -34,12 +47,20 @@ Funding = "https://buymeacoffee.com/jlianesglrs"
 [tool.hatch.build.targets.wheel]
 packages = ["src/httpquoted"]
 
+[tool.hatch.build.targets.sdist]
+# Third-party reference files are fetched locally and never shipped; only their manifest is.
+exclude = [
+    ".github",
+    "IMPROVEMENTS-round*.md",
+    "tests/upstream/*.txt",
+]
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "RUF"]
 
 [tool.mypy]
 python_version = "3.10"
