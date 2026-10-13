@@ -24,6 +24,7 @@ LOOSE_QUOTED_RUN = re.compile(r'[^"\\]*')
 LOOSE_COMMENT_RUN = re.compile(r"[^()\\]*")
 TOKEN_RE = re.compile(r"[!#$%&'*+\-.^_`|~0-9A-Za-z]+")
 NOT_FIELD_TEXT = re.compile(r"[^\t\x20-\x7e\x80-\xff]")
+NOT_ASCII_TEXT = re.compile(r"[^\t\x20-\x7e]")
 
 
 class QuotedStringError(ValueError):
@@ -46,12 +47,12 @@ def describe(char: str) -> str:
 
 def check_field_text(value: str, *, ascii_only: bool = False) -> None:
     """Raise unless every character may appear in a field value written by a sender."""
-    bad = NOT_FIELD_TEXT.search(value)
-    if bad is not None:
-        raise QuotedStringError(f"{describe(bad.group())} is not allowed", bad.start())
-    if ascii_only and not value.isascii():
-        offset = next(i for i, char in enumerate(value) if not char.isascii())
-        raise QuotedStringError(f"{describe(value[offset])} is obs-text", offset)
+    bad = (NOT_ASCII_TEXT if ascii_only else NOT_FIELD_TEXT).search(value)
+    if bad is None:
+        return
+    char = bad.group()
+    kind = "is obs-text" if char in OBS_TEXT else "is not allowed"
+    raise QuotedStringError(f"{describe(char)} {kind}", bad.start())
 
 
 def as_text(value: str | bytes) -> str:

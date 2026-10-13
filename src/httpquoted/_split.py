@@ -5,14 +5,18 @@ from __future__ import annotations
 import re
 from typing import AnyStr
 
-from ._chars import NOT_FIELD_TEXT, QuotedStringError, as_text, describe, like
+from ._chars import FIELD_TEXT, NOT_FIELD_TEXT, QuotedStringError, as_text, describe, like
 from ._scan import scan_comment, scan_quoted_string
 
 _RESERVED = frozenset('"\\()')
 
 
 def split_list(
-    header: AnyStr, *, separator: str = ",", comments: bool = False, strict: bool = False
+    header: AnyStr,
+    *,
+    separator: str | bytes = ",",
+    comments: bool = False,
+    strict: bool = False,
 ) -> list[AnyStr]:
     """Split a list-style header on separators that sit outside quoted-strings.
 
@@ -21,14 +25,15 @@ def split_list(
     Server) is skipped as a unit too, nested or not, and a DQUOTE inside it is plain
     text. Each element is trimmed of surrounding spaces and tabs, and empty elements
     are dropped, as section 5.6.1.2 asks of recipients. `separator` is "," for lists
-    and ";" for parameters. Elements keep their quotes; `unquote` them as needed.
+    and ";" for parameters, as `str` or `bytes`. Elements keep their quotes.
 
     Lenient by default: an unterminated quoted-string or comment runs to the end. With
-    `strict=True` that, a stray ")" and any character that is not field content (CR,
-    LF, NUL, other controls) raise `QuotedStringError`.
+    `strict=True`, `QuotedStringError` is raised for a character that is not field
+    content (CR, LF, NUL, other controls, DEL), a quoted-string or comment that breaks
+    its grammar or never ends, and a stray ")" when `comments=True`. The grammar of
+    each element belongs to the field and is left to the caller: `"a"b` is one element.
     """
-    if len(separator) != 1 or separator in _RESERVED:
-        raise ValueError("separator must be one character other than DQUOTE, backslash, ( or )")
+    separator = check_separator(separator)
     text = as_text(header)
     if strict:
         bad = NOT_FIELD_TEXT.search(text)
@@ -57,6 +62,16 @@ def split_list(
             pos += 1
     _keep(text[begin:], header, elements)
     return elements
+
+
+def check_separator(separator: str | bytes) -> str:
+    """Return the separator as text, or raise ValueError if it cannot split a field value."""
+    sep = as_text(separator)
+    if len(sep) != 1 or sep in _RESERVED or sep not in FIELD_TEXT:
+        raise ValueError(
+            "separator must be one field character other than DQUOTE, backslash, ( or )"
+        )
+    return sep
 
 
 def _keep(element: str, header: AnyStr, elements: list[AnyStr]) -> None:

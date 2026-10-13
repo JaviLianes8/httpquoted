@@ -21,8 +21,13 @@ def main() -> int:
     manifest = json.loads((FOLDER / "MANIFEST.json").read_text(encoding="utf-8"))
     failed = 0
     for name, entry in manifest.items():
-        with urllib.request.urlopen(entry["url"], timeout=60) as response:
-            body = response.read()
+        try:
+            with urllib.request.urlopen(entry["url"], timeout=60) as response:
+                body = response.read()
+        except OSError as error:
+            print(f"{name}: cannot fetch {entry['url']}: {error}")
+            failed += 1
+            continue
         digest = hashlib.sha256(body).hexdigest()
         if len(body) != entry["size"] or digest != entry["sha256"]:
             print(f"{name}: got {len(body)} bytes, sha256 {digest}; manifest differs")

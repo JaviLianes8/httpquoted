@@ -69,7 +69,7 @@ def test_a_bad_separator_is_a_usage_error(run: Run, capsys: pytest.CaptureFixtur
     with pytest.raises(SystemExit) as caught:
         run("split", "--separator", ";;", "a")
     assert caught.value.code == 2
-    assert "separator must be one character" in capsys.readouterr().err
+    assert "separator must be one field character" in capsys.readouterr().err
 
 
 def test_a_command_is_required(run: Run) -> None:

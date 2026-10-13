@@ -40,6 +40,9 @@ CALLS: dict[str, Callable[[str], object]] = {
     "split_list comments": lambda v: hq.split_list(v, comments=True),
     "split_list strict": lambda v: hq.split_list(v, comments=True, strict=True),
     "is_token": hq.is_token,
+    "bytes unquote": lambda v: hq.unquote(v.encode("latin-1"), strict=True),
+    "bytes split_list": lambda v: hq.split_list(v.encode("latin-1"), comments=True),
+    "bytes quote_if_needed": lambda v: hq.quote_if_needed(v.encode("latin-1")),
     "quote": hq.quote,
     "quote_comment": hq.quote_comment,
 }
@@ -55,7 +58,7 @@ def test_hostile_input_is_handled_in_linear_time(pattern: str, call: str) -> Non
 
 
 @pytest.mark.parametrize("pattern", ["(", '"', "\\"])
-def test_scanners_handle_a_megabyte_from_every_start(pattern: str) -> None:
+def test_scanners_handle_a_megabyte_of_openers_and_backslashes(pattern: str) -> None:
     text = pattern * SIZE
     started = time.perf_counter()
     for scan in (hq.scan_quoted_string, hq.scan_comment):

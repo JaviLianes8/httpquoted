@@ -9,7 +9,7 @@ from collections.abc import Sequence
 from ._chars import QuotedStringError
 from ._comment import quote_comment, unquote_comment
 from ._quote import quote, unquote
-from ._split import split_list
+from ._split import check_separator, split_list
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -48,18 +48,43 @@ def _convert(args: argparse.Namespace, value: str) -> list[str]:
     return split_list(value, separator=args.separator, comments=args.comments, strict=args.strict)
 
 
+def _read_lines() -> list[str]:
+    # Field values are octets: read standard input as ISO-8859-1, never the locale codec.
+    buffer = getattr(sys.stdin, "buffer", None)
+    data = buffer.read().decode("latin-1") if buffer is not None else sys.stdin.read()
+    lines = [line.removesuffix("\r") for line in data.split("\n")]
+    return lines[:-1] if lines and not lines[-1] else lines
+
+
+def _write_line(line: str) -> None:
+    buffer = getattr(sys.stdout, "buffer", None)
+    if buffer is None:
+        sys.stdout.write(line + "\n")
+        return
+    sys.stdout.flush()
+    buffer.write(line.encode("latin-1") + b"\n")
+    buffer.flush()
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry point of the `httpquoted` command; returns the exit status."""
     parser = _parser()
     args = parser.parse_args(argv)
-    values = args.values or [line.rstrip("\r\n") for line in sys.stdin]
+    if args.command == "split":
+        try:
+            check_separator(args.separator)
+        except ValueError as error:
+            parser.error(str(error))
+    values = args.values or _read_lines()
     try:
         for value in values:
             for line in _convert(args, value):
-                print(line)
+                _write_line(line)
     except QuotedStringError as error:
         print(f"httpquoted: {error}", file=sys.stderr)
         return 1
-    except ValueError as error:
-        parser.error(str(error))
+    except UnicodeEncodeError as error:
+        char = error.object[error.start]
+        print(f"httpquoted: U+{ord(char):04X} is not an ISO-8859-1 octet", file=sys.stderr)
+        return 1
     return 0

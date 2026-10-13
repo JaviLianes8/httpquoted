@@ -48,6 +48,8 @@ def scan_comment(text: AnyStr, start: int = 0, *, strict: bool = False) -> tuple
 
 
 def _expect(source: str, start: int, opener: str, rule: str) -> None:
+    if isinstance(start, bool) or not isinstance(start, int):
+        raise TypeError(f"start must be an int, got {type(start).__name__}")
     if not 0 <= start < len(source) or source[start] != opener:
         raise QuotedStringError(f"a {rule} must start with {opener}", start)
 

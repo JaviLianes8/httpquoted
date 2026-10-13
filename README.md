@@ -105,7 +105,9 @@ $ httpquoted split --comments '1.0 fred (proxy, eu), 1.1 example.net'
 
 Values come from the arguments, or one per line from standard input. `quote` takes
 `--comment` and `--ascii-only`; `unquote` takes `--comment` and `--strict`; `split`
-takes `--separator`, `--comments` and `--strict`. A rejected value exits with status 1.
+takes `--separator`, `--comments` and `--strict`. Standard input and output are read
+and written as ISO-8859-1, so octets pass through unchanged. A rejected value exits with
+status 1.
 
 ## API
 
@@ -123,11 +125,25 @@ takes `--separator`, `--comments` and `--strict`. A rejected value exits with st
 | `split_list(header, *, separator=",", comments=False, strict=False)` | Elements outside quotes (and comments), trimmed, empty ones dropped |
 | `QuotedStringError` | `ValueError` with `reason` and `offset` |
 
-Lenient mode never raises on malformed input (unterminated strings run to the end).
-Strict mode follows the grammar of RFC 9110 sections 5.6.2 to 5.6.5 to the character;
-the tests evaluate that grammar from the fetched RFC and compare it with the functions
-for every code point up to U+010F. Every scan is linear in the length of the input,
-including a megabyte of backslashes or nested parentheses.
+Lenient mode never raises on malformed input. The scanners stop at the first closing
+quote or parenthesis and let an unterminated value run to the end, while lenient
+`unquote` and `unquote_comment` keep the 0.1.0 behaviour: they strip the first and last
+character when those are the quotes (or parentheses) and resolve quoted-pairs in between.
+
+Strict mode checks the token, quoted-string, quoted-pair and comment rules of RFC 9110
+sections 5.6.2 to 5.6.5 character by character; the tests evaluate that grammar from the
+fetched RFC and compare it with the functions for every code point up to U+010F. Strict
+`split_list` checks field content and every quoted-string and comment it meets, not the
+grammar of each element, which belongs to the field (`"a"b` is one element).
+
+The value of a comment is display text: quoted-pairs are resolved and nested comments
+keep their parentheses, so `\)` and a nesting `)` look alike. To parse it again, slice
+the raw comment with the end offset that `scan_comment` returns.
+
+obs-text includes U+0080 to U+009F, which some tools treat as line breaks (U+0085);
+section 5.5 asks new fields to use ASCII, which `ascii_only=True` enforces. Every scan
+is linear in the length of the input, including a megabyte of backslashes or nested
+parentheses.
 
 ## Why
 

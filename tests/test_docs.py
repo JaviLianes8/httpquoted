@@ -57,6 +57,10 @@ def test_changelog_has_an_entry_for_this_version() -> None:
     assert f"## [{httpquoted.__version__}]" in text
 
 
+# Folders listed in .gitignore hold third-party files (virtual environments, builds).
+IGNORED = {"__pycache__", "venv", "build", "dist", "htmlcov"}
+
+
 def test_no_em_dash_anywhere_in_the_tree() -> None:
     suffixes = {".py", ".md", ".toml", ".ps1", ".txt", ".yml", ".json"}
     for path in ROOT.rglob("*"):
@@ -64,7 +68,10 @@ def test_no_em_dash_anywhere_in_the_tree() -> None:
         if not path.is_file() or path.suffix not in suffixes or parts[:2] == ("tests", "upstream"):
             continue
         if any(
-            (part.startswith(".") and part != ".github") or part == "__pycache__" for part in parts
+            (part.startswith(".") and part != ".github")
+            or part in IGNORED
+            or part.endswith(".egg-info")
+            for part in parts
         ):
             continue
         assert chr(0x2014) not in path.read_text(encoding="utf-8"), path
