@@ -9,10 +9,10 @@ Progress:
 - [x] List splitting: separator, comments, strict mode
 - [x] Bytes in, bytes out (ISO-8859-1) across the API
 - [x] Command line
-- [ ] Contracts: pinned sources, RFC examples, round trips, hostile input, README, installed wheel
+- [x] Contracts: pinned sources, RFC examples, round trips, hostile input, README, installed wheel
 - [x] Docs and packaging: README, CHANGELOG, metadata, sdist contents
-- [ ] Gates: ruff format, ruff check, mypy --strict, pytest
-- [ ] Mutation run: removing guarded logic makes the suite fail
+- [x] Gates: ruff format, ruff check, mypy --strict, pytest
+- [x] Mutation run: removing guarded logic makes the suite fail
 - [ ] Independent review findings fixed with regression tests
 - [ ] Pull request opened, guard clean
 
@@ -95,3 +95,18 @@ Progress:
 - obs-fold and field line handling (RFC 9112): the input is one field value.
 - RFC 8187 ext-values (`name*=UTF-8''...`) and Structured Fields (RFC 9651), which have
   their own string syntax.
+
+## Verification
+
+Run on a clean clone of the branch on a build machine (Python 3.14, Windows), with the
+reference files fetched and checked against the manifest:
+
+- Gates: ruff format, ruff check, mypy --strict (src, and src with tests) and pytest
+  exit 0; the installed-wheel test ran (`HTTPQUOTED_E2E=1`) and no test skipped.
+- Mutation run: 53 mutants, each removing or bending one guard (character classes, the
+  CR LF and DEL refusal, obs-text and `ascii_only`, quoted-pair checks, nesting depth,
+  end offsets, strict trailing text, separator validation and escaping, comment mode,
+  element trimming, the bytes bridge, a quadratic split loop, CLI exit codes). The first
+  pass left two alive (a quoted-pair of a line break in lenient `unquote`, and a `^`
+  separator before a quoted-string); both have tests now and die. Baseline green before
+  and after.

@@ -71,6 +71,8 @@ def test_split_list_rejects_a_separator_that_cannot_work(separator: str) -> None
 @pytest.mark.parametrize("separator", ["]", "^", "-", "."])
 def test_split_list_takes_regex_metacharacters_literally(separator: str) -> None:
     assert split_list(f"a{separator}b", separator=separator) == ["a", "b"]
+    quoted = f'"x{separator}y"'
+    assert split_list(f"{quoted}{separator}c", separator=separator) == [quoted, "c"]
 
 
 def test_lenient_split_returns_an_unterminated_quoted_string_as_an_element() -> None:

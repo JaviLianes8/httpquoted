@@ -73,6 +73,10 @@ def test_unquote_resolves_any_quoted_pair() -> None:
     assert unquote('"\\a\\\\\\ b"') == "a\\ b"
 
 
+def test_lenient_unquote_resolves_a_quoted_pair_of_any_character() -> None:
+    assert unquote('"a\\\nb\\\r"') == "a\nb\r"
+
+
 def test_unquote_returns_a_bare_token_unchanged() -> None:
     assert unquote("gzip") == "gzip"
 
