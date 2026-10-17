@@ -1,4 +1,4 @@
-"""Contracts added after the blind mutation round: each pins a promise no test held before."""
+"""Contracts added after the blind mutation round and the review: each pins an unheld promise."""
 
 from __future__ import annotations
 
@@ -49,3 +49,18 @@ def test_a_posix_separator_is_read_as_octets_like_the_values(
     with pytest.raises(SystemExit) as caught:
         main()
     assert caught.value.code == 2
+
+
+@pytest.mark.parametrize("value", ["[a)", "x(a)", "a)"])
+def test_lenient_unquote_comment_needs_both_parentheses(value: str) -> None:
+    assert hq.unquote_comment(value) == value
+    assert hq.unquote_comment(value.encode()) == value.encode()
+
+
+def test_only_one_carriage_return_of_a_crlf_line_is_removed(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(sys, "stdin", io.TextIOWrapper(io.BytesIO(b"a\r\r\n"), encoding="latin-1"))
+    monkeypatch.setattr(sys, "stdout", io.TextIOWrapper(io.BytesIO(), encoding="latin-1"))
+    assert main(["quote"]) == 1
+    assert capsys.readouterr().err == "httpquoted: U+000D is not allowed at offset 1\n"
