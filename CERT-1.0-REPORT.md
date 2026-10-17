@@ -2,12 +2,12 @@
 
 Progress:
 - [x] Branch `release/1.0.0` created from `main` (0.2.0, 7cbdbba; PyPI has 0.2.0)
-- [ ] Baseline gates run on 0.2.0
-- [ ] API review and 1.0.0 API changes (item 1)
-- [ ] Real ground truth: fetched sources and live reference parsers (item 7)
-- [ ] Errors, typing, docstrings and doctests (items 2 to 5)
+- [x] Baseline gates run on 0.2.0
+- [x] API review and 1.0.0 API changes (item 1)
+- [x] Real ground truth: fetched sources and live reference parsers (item 7)
+- [x] Errors, typing, docstrings and doctests (items 2 to 5)
 - [ ] Contract, fuzz and author mutation round (items 6, 9, 18)
-- [ ] Docs: README, GUIDE, CHANGELOG (items 11, 12)
+- [x] Docs: README, GUIDE, CHANGELOG (items 11, 12)
 - [ ] Packaging, e2e and upgrade from PyPI 0.2.0 (items 8, 10, 13, 14), author run
 - [ ] Five QA lenses report PASS (item 19)
 - [ ] Independent reviewer reports PASS (item 16)
