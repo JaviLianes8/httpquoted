@@ -9,6 +9,7 @@ and must give the same answers. Each known difference is named and checked, not 
 from __future__ import annotations
 
 import email.utils
+import importlib
 import importlib.metadata
 import json
 import shutil
@@ -27,7 +28,7 @@ RUNS: dict[str, Any] = json.loads(
 )
 CASES: dict[str, list[str]] = RUNS["cases"]
 sys.path.insert(0, str(ROOT / "scripts"))
-import oracle_fixture  # noqa: E402
+oracle_fixture = importlib.import_module("oracle_fixture")
 
 
 def _unclosed(value: str) -> bool:
