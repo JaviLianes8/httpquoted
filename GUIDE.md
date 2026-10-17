@@ -94,7 +94,7 @@ never reaches a log through an error. It survives pickling. The reasons are:
 | `U+XXXX is not allowed in a quoted-string` (or `comment`) | a character outside qdtext or ctext |
 | `U+XXXX cannot be quoted` | the character after a backslash |
 | `a quoted-pair needs a character` | a backslash at the end of the text |
-| `unterminated quoted-string` (or `comment`) | the opening quote or parenthesis |
+| `unterminated quoted-string` (or `comment`) | the opening quote, or the outermost opening parenthesis |
 | `text after the closing quote` (or `parenthesis`) | the first character after it |
 | `not a token or a quoted-string` | the first character that is not a token character |
 | `a quoted-string must start with "` (or `comment`, `(`) | the `start` given to a scanner, or 0 for strict `unquote_comment` |
@@ -129,7 +129,7 @@ The tests run these tools on the same seeded inputs and check each statement bel
   `unquote_header_value` the same as lenient `unquote` (except after a backslash
   followed by LF). `parse_list_header` gives `[unquote(e) for e in split_list(v)]`,
   but returns an empty list when a quoted-string never closes.
-- The standard library: `urllib.request.parse_http_list` splits at the same commas but
+- The standard library: `urllib.request.parse_http_list` splits a well-formed value at the same commas but
   keeps empty items and drops the backslash of each quoted-pair; `email.utils.quote`
   escapes the same two characters as `quote`.
 - h11 0.16.0 recognises the same tokens; it accepts the controls 0x01 to 0x08, 0x0E to

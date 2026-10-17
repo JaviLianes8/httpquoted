@@ -88,7 +88,8 @@ def _drop_pairs(element: str) -> str:
     out, pos = [], 0
     while (start := element.find('"', pos)) != -1:
         value, end = hq.scan_quoted_string(element, start)
-        out.append(element[pos:start] + '"' + value + ('"' if end <= len(element) else ""))
+        closed = hq.scan_quoted_string(element[start:end] + "x")[1] == end - start
+        out.append(element[pos:start] + '"' + value + ('"' if closed else ""))
         pos = end
     return "".join(out) + element[pos:]
 
