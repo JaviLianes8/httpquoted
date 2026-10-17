@@ -25,5 +25,59 @@
     "licence": "IETF Trust Legal Provisions",
     "size": 26359,
     "sha256": "fc871020f53baa6b60fc6835c557b433f38d53c5cc41ab56d03622b084f53a12"
+  },
+  "rfc9111.txt": {
+    "title": "RFC 9111, HTTP Caching (June 2022)",
+    "url": "https://www.rfc-editor.org/rfc/rfc9111.txt",
+    "revision": "RFC 9111 as published (RFCs are immutable)",
+    "fetched": "2026-10-17",
+    "licence": "IETF Trust Legal Provisions",
+    "size": 84477,
+    "sha256": "aeb52adb3279d5f23dae34f68af11bd5cef0a0aff7ffcd014c9ca93c5302cf3e"
+  },
+  "rfc7616.txt": {
+    "title": "RFC 7616, HTTP Digest Access Authentication (September 2015)",
+    "url": "https://www.rfc-editor.org/rfc/rfc7616.txt",
+    "revision": "RFC 7616 as published (RFCs are immutable)",
+    "fetched": "2026-10-17",
+    "licence": "IETF Trust Legal Provisions",
+    "size": 71946,
+    "sha256": "65e4770b3c3bfe129cdaaca358454118a6c10fd261dd3822e07ca786199e907b"
+  },
+  "rfc6266.txt": {
+    "title": "RFC 6266, Use of the Content-Disposition Header Field in HTTP (June 2011)",
+    "url": "https://www.rfc-editor.org/rfc/rfc6266.txt",
+    "revision": "RFC 6266 as published (RFCs are immutable)",
+    "fetched": "2026-10-17",
+    "licence": "IETF Trust Legal Provisions",
+    "size": 26080,
+    "sha256": "2887d464e7a2a15877aba5d54b2e8e0c06c32294c44c9d95eb8940069ab43d33"
+  },
+  "whatwg-fetch.bs.txt": {
+    "title": "WHATWG Fetch Standard, Bikeshed source",
+    "url": "https://raw.githubusercontent.com/whatwg/fetch/e9460d1b22ead1c6a72eeac37fb2ec0dc01aeb1d/fetch.bs",
+    "revision": "whatwg/fetch commit e9460d1b22ead1c6a72eeac37fb2ec0dc01aeb1d (2026-10-06)",
+    "fetched": "2026-10-17",
+    "licence": "CC BY 4.0 (WHATWG)",
+    "size": 444131,
+    "sha256": "ffa13a962874f83fab93e10206727173ce1262e5e6725720148b8849f4092121"
+  },
+  "cpython-test_urllib2.py.txt": {
+    "title": "CPython Lib/test/test_urllib2.py (parse_http_list tests)",
+    "url": "https://raw.githubusercontent.com/python/cpython/010bebbf9fd12bba1e3f40bdbddacd51a9c2bf20/Lib/test/test_urllib2.py",
+    "revision": "python/cpython commit 010bebbf9fd12bba1e3f40bdbddacd51a9c2bf20",
+    "fetched": "2026-10-17",
+    "licence": "PSF License 2.0",
+    "size": 88916,
+    "sha256": "348a222191fea51fdec0a65b0c83190e208a1211955595ffa61399e1a087adaa"
+  },
+  "werkzeug-test_http.py.txt": {
+    "title": "Werkzeug 3.1.9 tests/test_http.py (list header tests)",
+    "url": "https://raw.githubusercontent.com/pallets/werkzeug/6604c3b8784ecc7cf5ac0b7412d916989b4c7d45/tests/test_http.py",
+    "revision": "pallets/werkzeug tag 3.1.9, commit 6604c3b8784ecc7cf5ac0b7412d916989b4c7d45",
+    "fetched": "2026-10-17",
+    "licence": "BSD-3-Clause",
+    "size": 30638,
+    "sha256": "7a996e569a9817e43014395cbf1fccda38e9e10ba5d1f5e310fe03a3e62fb0b7"
   }
 }

@@ -92,3 +92,25 @@ def test_the_cli_examples_match_the_command_line() -> None:
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
             main(shlex.split(lines[start][len("$ httpquoted ") :]))
         assert (out.getvalue() + err.getvalue()).splitlines() == lines[start + 1 : stop]
+
+
+def test_readme_links_are_absolute_for_pypi() -> None:
+    for target in re.findall(r"\]\(([^)]+)\)", README):
+        assert target.startswith("https://"), target
+
+
+def test_the_guide_usage_lines_match_the_parser() -> None:
+    guide = (ROOT / "GUIDE.md").read_text(encoding="utf-8")
+    block = guide.split("## Command line", 1)[1].split("```", 2)[1]
+    for line in block.strip().splitlines():
+        command = line.split()[1]
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.suppress(SystemExit):
+            main([command, "--help"])
+        usage = " ".join(out.getvalue().split("\n\n", 1)[0].split())
+        assert usage == "usage: " + line, usage
+
+
+def test_the_changelog_dates_the_stable_release() -> None:
+    text = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    assert re.search(r"^## \[1\.0\.0\] - \d{4}-\d{2}-\d{2}$", text, re.M)

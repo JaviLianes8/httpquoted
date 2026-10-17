@@ -6,7 +6,53 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-## [0.2.0]
+## [1.0.0] - 2026-10-17
+
+The public API is now stable: the eleven names in `httpquoted.__all__`, their
+signatures, defaults, results and error types, and the `httpquoted` command with its
+options and exit statuses. Results on valid input are identical to 0.2.0.
+
+### Changed
+
+- The `strict`, `ascii_only` and `comments` options must be real `bool` values; anything
+  else raises `TypeError` (0.2.0 used the truth value, so `strict="no"` meant strict).
+- `QuotedStringError` survives pickling (0.2.0 raised `TypeError` when unpickled).
+- The package no longer exposes a stray `annotations` attribute.
+- Public names report `httpquoted` as their module instead of a private module. One
+  side effect: `inspect.getsource(httpquoted.QuotedStringError)` can no longer find the
+  class source (functions are not affected).
+- A `TypeError` message names at most 40 characters of the offending type name.
+- A `str` or `bytes` subclass is read as its plain value without calling any of its
+  methods, and an `int` subclass given as `start` is read as its plain value.
+- A scanner `start` outside the text is reported at offset 0 or at the length of the
+  text instead of at the given value (0.2.0 could not even format a `start` with more
+  than 4,300 digits).
+- Command line: on POSIX systems each argument is read back as the octets it was given
+  (ISO-8859-1, like standard input) instead of as file system text, so a UTF-8 argument
+  is written out unchanged; an interrupt exits with status 130 and a closed output
+  (`| head`, reported as EPIPE on POSIX and EINVAL on Windows) with status 1, both
+  without a traceback. A closed standard input reads as no values, a closed standard
+  output exits with status 1, another write error (a full disk) is reported with its
+  errno and exits with status 1, and with standard error closed the reasons are dropped
+  instead of being written into the output. The help names the values `VALUE`
+  and the separator `SEP`.
+- The sdist is built from an explicit file list, so a local virtual environment or
+  scratch file next to the sources is never packed.
+
+### Added
+
+- `GUIDE.md`: the grammar, lenient and strict modes, every error reason, the command
+  line and how the results compare with Werkzeug, h11, the standard library and the
+  WHATWG Fetch Standard.
+- A runnable example in the docstring of every public name.
+
+### Upgrading from 0.2.0
+
+- Pass `True` or `False` to `strict`, `ascii_only` and `comments`.
+- Code that compared `QuotedStringError.__module__` or a function's `__module__` with
+  a private module name now sees `httpquoted`.
+
+## [0.2.0] - 2026-10-16
 
 ### Added
 
@@ -31,7 +77,7 @@ All notable changes to this project are documented here. The format follows
 - Every function raises `TypeError` for input that is neither `str` nor `bytes`;
   `is_token(None)` returned `False` before.
 
-## [0.1.0]
+## [0.1.0] - 2026-10-12
 
 - First release: `quote`, `unquote`, `is_token` and `split_list` for the HTTP
   quoted-string primitive (RFC 9110).
