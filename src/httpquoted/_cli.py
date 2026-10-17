@@ -31,12 +31,14 @@ def _parser() -> argparse.ArgumentParser:
             command.add_argument("--ascii-only", action="store_true", help="refuse obs-text")
         else:
             command.add_argument("--strict", action="store_true", help="reject malformed input")
-        command.add_argument("values", nargs="*")
+        command.add_argument("values", nargs="*", metavar="VALUE")
     split = commands.add_parser("split", help="print each list element on its own line")
-    split.add_argument("--separator", default=",", help='"," (default) or ";" for parameters')
+    split.add_argument(
+        "--separator", default=",", metavar="SEP", help='"," (default) or ";" for parameters'
+    )
     split.add_argument("--comments", action="store_true", help="skip (comments) as a unit")
     split.add_argument("--strict", action="store_true", help="reject malformed input")
-    split.add_argument("values", nargs="*")
+    split.add_argument("values", nargs="*", metavar="VALUE")
     return parser
 
 

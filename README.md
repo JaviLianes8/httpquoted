@@ -106,8 +106,8 @@ $ httpquoted split --comments '1.0 fred (proxy, eu), 1.1 example.net'
 Values come from the arguments, or one per line from standard input. `quote` takes
 `--comment` and `--ascii-only`; `unquote` takes `--comment` and `--strict`; `split`
 takes `--separator`, `--comments` and `--strict`. Standard input and output are read
-and written as ISO-8859-1, so octets pass through unchanged. A rejected value exits with
-status 1.
+and written as ISO-8859-1, so octets pass through unchanged. The exit status is 0 on
+success, 1 when a value is rejected, 2 for a usage error and 130 when interrupted.
 
 ## API
 
@@ -147,24 +147,37 @@ parentheses.
 
 ## Why
 
-The quoted-string codec of RFC 9110 sits under almost every HTTP header parser, yet no
-small typed library ships it on its own: the stdlib `quopri` handles MIME
-quoted-printable (a different thing), and the logic is vendored privately into
-frameworks and SDKs, often without the checks that stop header injection. Other
-ecosystems expose it directly (Ruby has `Protocol::HTTP::QuotedString`). This is that
-primitive, zero-dependency and typed, for the times you parse or build a header by hand.
+The quoted-string codec of RFC 9110 sits under almost every HTTP header parser, yet in
+Python it lives in pieces inside larger packages, each with its own rules:
+`urllib.request.parse_http_list` keeps empty items and drops the backslash of every
+quoted-pair, `email.utils.unquote` follows the mail rules and also strips `<...>`, and
+Werkzeug's `quote_header_value` writes a CR LF into the quoted value instead of refusing
+it. Other ecosystems expose the primitive directly (Ruby has
+`Protocol::HTTP::QuotedString`). This is that primitive, zero-dependency and typed, with
+strict parsing and quoting that cannot inject a header line, for the times you parse or
+build a header by hand. The [guide](https://github.com/JaviLianes8/httpquoted/blob/main/GUIDE.md)
+lists how its results compare with those tools, as checked by the tests.
 
 ## Development
 
-`scripts/check.ps1` runs format, lint, `mypy --strict` and the tests. The RFC checks
-read the RFCs from `tests/upstream/`, which is not committed: `python
-scripts/fetch_upstream.py` downloads them and verifies the sha256 of each against
-`tests/upstream/MANIFEST.json`; until then those tests skip. Set `HTTPQUOTED_E2E=1` to
-build the wheel and drive it from a fresh virtual environment.
+`scripts/check.ps1` runs format, lint, `mypy --strict` and the tests. The checks against
+the RFCs, the WHATWG Fetch Standard and the CPython and Werkzeug test vectors read those
+files from `tests/upstream/`, which is not committed: `python scripts/fetch_upstream.py`
+downloads them and verifies the sha256 of each against `tests/upstream/MANIFEST.json`;
+until then those tests skip. `tests/fixtures/oracle_runs.json` holds the answers of
+Werkzeug, h11, the standard library and Node recorded by `scripts/oracle_fixture.py`.
+Set `HTTPQUOTED_E2E=1` to build the wheel and drive it from a fresh virtual environment,
+and `HTTPQUOTED_E2E_PYPI=1` to upgrade the PyPI release in place and compare results.
+
+## Documentation
+
+- [Guide](https://github.com/JaviLianes8/httpquoted/blob/main/GUIDE.md): grammar, lenient
+  and strict modes, errors, command line, comparison with other parsers
+- [Changelog](https://github.com/JaviLianes8/httpquoted/blob/main/CHANGELOG.md)
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](https://github.com/JaviLianes8/httpquoted/blob/main/LICENSE).
 
 ## Links
 

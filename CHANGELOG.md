@@ -22,7 +22,17 @@ options and exit statuses. Results on valid input are identical to 0.2.0.
 - Command line: on POSIX systems each argument is read back as the octets it was given
   (ISO-8859-1, like standard input) instead of as file system text, so a UTF-8 argument
   is written out unchanged; an interrupt exits with status 130 and a closed output
-  (`| head`) with status 1, both without a traceback.
+  (`| head`) with status 1, both without a traceback. The help names the values `VALUE`
+  and the separator `SEP`.
+- The sdist is built from an explicit file list, so a local virtual environment or
+  scratch file next to the sources is never packed.
+
+### Added
+
+- `GUIDE.md`: the grammar, lenient and strict modes, every error reason, the command
+  line and how the results compare with Werkzeug, h11, the standard library and the
+  WHATWG Fetch Standard.
+- A runnable example in the docstring of every public name.
 
 ### Upgrading from 0.2.0
 

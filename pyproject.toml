@@ -48,13 +48,21 @@ Funding = "https://buymeacoffee.com/jlianesglrs"
 packages = ["src/httpquoted"]
 
 [tool.hatch.build.targets.sdist]
+# An explicit list, so a local virtual environment or scratch file is never packed.
 # Third-party reference files are fetched locally and never shipped; only their manifest is.
-exclude = [
-    ".github",
-    "CERT-1.0-REPORT.md",
-    "IMPROVEMENTS-round*.md",
-    "tests/upstream/*.txt",
+only-include = [
+    "src",
+    "tests",
+    "scripts/fetch_upstream.py",
+    "scripts/oracle_fixture.py",
+    "README.md",
+    "GUIDE.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "requirements-dev.txt",
 ]
+exclude = ["tests/upstream/*.txt", "__pycache__"]
 
 [tool.ruff]
 line-length = 100

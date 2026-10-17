@@ -86,6 +86,12 @@ def test_installed_wheel_end_to_end(tmp_path: Path) -> None:
     assert "httpquoted = httpquoted._cli:main" in zipfile.ZipFile(wheel).read(entry_points).decode()
     listing = _run(sys.executable, "-m", "tarfile", "-l", sdist).stdout.decode()
     assert "IMPROVEMENTS-round" not in listing and "CERT-1.0-REPORT" not in listing
+    allowed: tuple[str, ...] = ("src/", "tests/", "scripts/", "README.md", "GUIDE.md")
+    allowed += ("CHANGELOG.md",)
+    allowed += ("CONTRIBUTING.md", "LICENSE", "requirements-dev.txt", "pyproject.toml")
+    allowed += ("PKG-INFO", ".gitignore")
+    for name in listing.split():
+        assert name.split("/", 1)[1].startswith(allowed), name
     fetched = [n for n in listing.split() if "/upstream/" in n and not n.endswith("MANIFEST.json")]
     assert fetched == []
     assert "tests/fixtures/oracle_runs.json" in listing and "scripts/oracle_fixture.py" in listing
