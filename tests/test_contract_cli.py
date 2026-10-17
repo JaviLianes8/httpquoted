@@ -2,21 +2,27 @@
 
 from __future__ import annotations
 
+import importlib.metadata
 import io
+import os
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
+import httpquoted
 from httpquoted import _cli
 from httpquoted._cli import main
 
-SRC = str(Path(__file__).resolve().parents[1] / "src")
+# The checkout's sources when present; an installed wheel is tested as it is otherwise.
+_SRC_DIR = Path(__file__).resolve().parents[1] / "src"
+SRC = str(_SRC_DIR) if _SRC_DIR.is_dir() else ""
 
 
 def _run(*args: str, stdin: bytes = b"") -> subprocess.CompletedProcess[bytes]:
-    code = f"import sys; sys.path.insert(0, {SRC!r}); from httpquoted._cli import main; "
+    code = f"import sys; sys.path[:0] = [p for p in [{SRC!r}] if p]; "
+    code += "from httpquoted._cli import main; "
     code += "sys.exit(main())"
     return subprocess.run(
         [sys.executable, "-c", code, *args], input=stdin, capture_output=True, check=False
@@ -118,7 +124,8 @@ def test_arguments_passed_to_main_are_used_as_given(monkeypatch: pytest.MonkeyPa
 def test_a_reader_that_closes_early_gets_exit_1_without_a_traceback(tmp_path: Path) -> None:
     source = tmp_path / "big.txt"
     source.write_bytes(b"a," * 400_000 + b"\n")
-    code = f"import sys; sys.path.insert(0, {SRC!r}); from httpquoted._cli import main; "
+    code = f"import sys; sys.path[:0] = [p for p in [{SRC!r}] if p]; "
+    code += "from httpquoted._cli import main; "
     code += "sys.exit(main())"
     with source.open("rb") as stdin:
         process = subprocess.Popen(
@@ -164,3 +171,24 @@ class _InvalidPipe(io.StringIO):
 def test_an_einval_on_output_is_a_closed_output(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "stdout", _InvalidPipe())
     assert main(["quote", "a"]) == 1
+
+
+def test_python_dash_m_runs_the_command() -> None:
+    package_parent = str(Path(httpquoted.__file__).resolve().parents[1])
+    env = {**os.environ, "PYTHONPATH": package_parent}
+    run = subprocess.run(
+        [sys.executable, "-m", "httpquoted", "quote", "a b"], env=env, capture_output=True
+    )
+    assert (run.returncode, run.stdout.strip()) == (0, b'"a b"')
+
+
+def test_the_console_script_is_declared_and_installed() -> None:
+    try:
+        dist = importlib.metadata.distribution("httpquoted")
+    except importlib.metadata.PackageNotFoundError:
+        pytest.skip("httpquoted is not installed")
+    (entry,) = [e for e in dist.entry_points if e.group == "console_scripts"]
+    assert (entry.name, entry.value) == ("httpquoted", "httpquoted._cli:main")
+    assert entry.load() is main
+    scripts = [f for f in dist.files or [] if f.name in ("httpquoted", "httpquoted.exe")]
+    assert scripts and all(Path(str(f.locate())).is_file() for f in scripts)

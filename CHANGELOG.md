@@ -17,6 +17,7 @@ options and exit statuses. Results on valid input are identical to 0.2.0.
 - The `strict`, `ascii_only` and `comments` options must be real `bool` values; anything
   else raises `TypeError` (0.2.0 used the truth value, so `strict="no"` meant strict).
 - `QuotedStringError` survives pickling (0.2.0 raised `TypeError` when unpickled).
+- The package no longer exposes a stray `annotations` attribute.
 - Public names report `httpquoted` as their module instead of a private module. One
   side effect: `inspect.getsource(httpquoted.QuotedStringError)` can no longer find the
   class source (functions are not affected).
