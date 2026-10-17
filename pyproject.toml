@@ -31,7 +31,7 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["ruff", "mypy", "pytest", "pytest-timeout", "build", "twine"]
+dev = ["ruff", "mypy", "pytest", "pytest-timeout", "build", "twine", "werkzeug==3.1.9", "h11==0.16.0"]
 
 [project.scripts]
 httpquoted = "httpquoted._cli:main"
