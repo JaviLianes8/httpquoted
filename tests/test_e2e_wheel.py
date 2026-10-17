@@ -52,6 +52,15 @@ for call in (
         assert isinstance(error, ValueError) and error.offset >= 0
     else:
         raise AssertionError("expected QuotedStringError")
+import pickle
+assert all(getattr(hq, name).__module__ == "httpquoted" for name in hq.__all__)
+assert pickle.loads(pickle.dumps(hq.QuotedStringError("r", 2))).offset == 2
+try:
+    hq.unquote("a", strict=1)
+except TypeError:
+    pass
+else:
+    raise AssertionError("strict=1 accepted")
 print("e2e ok")
 """
 
@@ -76,7 +85,10 @@ def test_installed_wheel_end_to_end(tmp_path: Path) -> None:
     entry_points = next(name for name in names if name.endswith("entry_points.txt"))
     assert "httpquoted = httpquoted._cli:main" in zipfile.ZipFile(wheel).read(entry_points).decode()
     listing = _run(sys.executable, "-m", "tarfile", "-l", sdist).stdout.decode()
-    assert "IMPROVEMENTS-round" not in listing and "rfc9110.txt" not in listing
+    assert "IMPROVEMENTS-round" not in listing and "CERT-1.0-REPORT" not in listing
+    fetched = [n for n in listing.split() if "/upstream/" in n and not n.endswith("MANIFEST.json")]
+    assert fetched == []
+    assert "tests/fixtures/oracle_runs.json" in listing and "scripts/oracle_fixture.py" in listing
     assert "tests/upstream/MANIFEST.json" in listing and "scripts/fetch_upstream.py" in listing
     assert "tests/test_sources.py" in listing
 

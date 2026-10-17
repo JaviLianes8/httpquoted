@@ -51,6 +51,7 @@ packages = ["src/httpquoted"]
 # Third-party reference files are fetched locally and never shipped; only their manifest is.
 exclude = [
     ".github",
+    "CERT-1.0-REPORT.md",
     "IMPROVEMENTS-round*.md",
     "tests/upstream/*.txt",
 ]
