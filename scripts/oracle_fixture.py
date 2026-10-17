@@ -115,7 +115,8 @@ def main() -> int:
         "node_mime": node_oracle(case),
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(record, ensure_ascii=True, indent=0) + "\n", encoding="utf-8")
+    text = json.dumps(record, ensure_ascii=True, indent=0) + "\n"
+    OUT.write_text(text, encoding="utf-8", newline="\n")
     print(f"wrote {OUT} with {sum(len(v) for v in case.values())} cases")
     return 0
 
