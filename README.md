@@ -1,5 +1,7 @@
 # httpquoted
 
+[![Lianes8 Certified](https://lianes8studio.com/certified/lianes8-certified-badge.svg)](https://lianes8studio.com/certified)
+
 Strict, typed and zero-dependency codec for the HTTP quoted-string, comment and token
 primitives of RFC 9110 section 5.6: safe quoting, strict or lenient parsing, scanners for
 hand-written parsers and list splitting that respects quotes and comments.

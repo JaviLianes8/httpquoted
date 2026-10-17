@@ -10,9 +10,50 @@ Progress:
 - [x] Docs: README, GUIDE, CHANGELOG (items 11, 12)
 - [x] Packaging, e2e and upgrade from PyPI 0.2.0 (items 8, 10, 13, 14), author run
 - [x] Five QA lenses report PASS (item 19)
-- [ ] Independent reviewer reports PASS (item 16)
-- [ ] Gates (item 15), final run
-- [ ] PR and trace guard CLEAN (item 17); merge and publish left to the maintainer
+- [x] Independent reviewer reports PASS (item 16)
+- [x] Gates (item 15), final run
+- [x] PR and trace guard CLEAN (item 17); merge and publish left to the maintainer
+
+## Scorecard
+
+Independent review round 2 at 18f4bec; the commits after it touch only this report and
+the README badge.
+
+| # | Item | Result |
+| --- | --- | --- |
+| 1 | Public API reviewed for stability | PASS: all eleven names, signatures and defaults kept from 0.2.0 with identical results on valid input; every change in CHANGELOG 1.0.0 with an upgrade list, checked against the real 0.2.0 by lenses a and d and the upgrade test |
+| 2 | `__all__` exact, no private imports in docs | PASS: eleven names, nothing else public (`dir()` pinned) |
+| 3 | Docstrings with runnable examples, doctests | PASS: every public name, 29 examples; every README and GUIDE example and usage line runs |
+| 4 | Typed end to end | PASS: `mypy --strict src tests scripts` clean, `py.typed` shipped, strict consumer client clean (lens a) |
+| 5 | Typed, documented, bounded errors | PASS: GUIDE table of every reason and offset; messages name code points, never the input; type names cut to 40 characters even for hostile metaclasses |
+| 6 | Contract asserts the full promise | PASS: 528 tests by default (530 with the opt-in end-to-end modules) |
+| 7 | Real ground truth | PASS: RFC 9110, 9111, 7230, 7616, 6266, 5234, the WHATWG Fetch Standard and the CPython and Werkzeug test vectors fetched with a hash manifest; Werkzeug 3.1.9, h11 0.16.0, the standard library and Node recorded and rerun live; lens b re-derived 66,721,887 comparisons with its own reference |
+| 8 | Real e2e incl. PyPI upgrade | PASS: wheel in fresh venvs, console script and `python -m httpquoted` by subprocess, in-place upgrade from PyPI 0.2.0 with every difference in the CHANGELOG, sabotages caught |
+| 9 | Seeded fuzz, no crash, hang or blowup | PASS: suite fuzz and WHATWG comparisons plus lens c (over 3,000,000 calls, linear to 10 MB, free-threaded threads) |
+| 10 | Supported Pythons | PASS: CPython 3.10.19, 3.11.5, 3.12.12, 3.13.2, 3.14.2 and 3.14.2 free-threaded from this PC (run staged on the laptop); 3.8 and 3.9 refused by `requires-python` |
+| 11 | README and `twine check` | PASS |
+| 12 | Dated CHANGELOG 1.0.0 section | PASS: `## [1.0.0] - 2026-10-17` |
+| 13 | pyproject 1.0.0, Production/Stable | PASS |
+| 14 | sdist and wheel contents | PASS: explicit sdist list, no fetched copies, report or scratch files |
+| 15 | Gates each exit 0 | PASS: each alone on a fresh clone at 18f4bec (Elena, CPython 3.14.2) |
+| 16 | Independent reviewer | PASS: round 1 FAIL at 569ebef, round 2 PASS at 18f4bec |
+| 17 | PR and trace guard | PR #3 from `release/1.0.0`, trace guard CLEAN; merge and publish left to the maintainer |
+| 18 | Contracts bite (mutations) | PASS: author 67, blind lens e 127 + 33, lens a 17, lens c 37 + 11 + 12, reviewer 40; every non-equivalent survivor killed by a contract |
+| 19 | Five independent QA lenses | PASS: a round 2, b round 1, c round 4, d round 2, e round 2 |
+
+## Behaviour changes against PyPI 0.2.0
+
+CHANGELOG 1.0.0's "Changed" and "Upgrading from 0.2.0" lists are the reference; lenses a
+and d traced every difference they measured to a line there (390,918 and 99,280 seeded
+calls). Results on valid input are identical. Changed: `strict`, `ascii_only` and
+`comments` must be `bool` (else `TypeError`); `QuotedStringError` unpickles; public names
+report `httpquoted` as their module (so `inspect.getsource` cannot find the error class);
+the stray `annotations` attribute is gone; type names in messages are cut to 40
+characters; `str`, `bytes` and `int` subclasses are read as plain values; a scanner
+`start` outside the text is reported at 0 or at the length of the text; command line:
+POSIX arguments read as octets, exit 130 on interrupt, exit 1 on a closed or failing
+output with no traceback, closed standard streams handled, `VALUE` and `SEP` in the help;
+the sdist is built from an explicit list.
 
 ## Baseline on 0.2.0 (before any change)
 
@@ -229,3 +270,4 @@ findings plus one sweep of at most 40 mutations on the code changed since.
 | Round | Head | Verdict | Findings and outcome |
 | --- | --- | --- | --- |
 | 1 | 569ebef | FAIL (items 6, 16, 18) | gates each exit 0 alone on a fresh clone (526 passed with both end-to-end variables and the fetched sources; 524 passed and 2 skipped without), `twine check --strict`, archives, metadata, hygiene and the trace guard checked, the wheel end to end and the upgrade from PyPI 0.2.0 rerun, the suite green on 3.10.19 and 3.14.2; its own 40 mutations: 38 killed, 2 missing contracts (R19: lenient `unquote_comment` accepting `[` as the opener; R37: `rstrip` of every CR on a standard input line). Pinned in `tests/test_contract_blind.py`, each confirmed to fail on its mutant |
+| 2 | 18f4bec | PASS | R19 and R37 killed by the new contracts; gates each exit 0 alone on a fresh clone at 18f4bec (530 passed with both end-to-end variables and the fetched sources, 528 passed and 2 skipped without), build and `twine check --strict` passed, consumer venv and PyPI upgrade rerun, trace guard CLEAN; all 19 items PASS |
