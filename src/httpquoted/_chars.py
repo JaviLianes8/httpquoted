@@ -53,8 +53,8 @@ class QuotedStringError(ValueError):
 def type_name(value: object) -> str:
     """The type name of a value for an error message, at most 40 characters."""
     # The name slot of the type itself: a metaclass property cannot replace or inflate it.
-    name = type.__dict__["__name__"].__get__(type(value))
-    return str.__getitem__(name, slice(0, 40)) if isinstance(name, str) else "object"
+    name: str = type.__dict__["__name__"].__get__(type(value))
+    return str.__getitem__(name, slice(0, 40))
 
 
 def check_flag(name: str, value: object) -> None:

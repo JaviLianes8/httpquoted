@@ -10,6 +10,7 @@ from typing import Any, NoReturn
 import pytest
 
 import httpquoted as hq
+from httpquoted import _cli as cli_module
 from httpquoted._cli import main
 
 
@@ -75,6 +76,12 @@ def test_readers_ignore_subclass_methods() -> None:
 def test_an_int_subclass_start_cannot_steer_the_scan_or_the_message() -> None:
     assert hq.scan_quoted_string('"abc"', HostileInt(0)) == ("abc", 5)
     assert hq.scan_comment("x(a)", HostileInt(1)) == ("a", 4)
+
+    class LyingInt(int):
+        def __int__(self) -> int:
+            return 0
+
+    assert hq.scan_quoted_string('a="b"', LyingInt(2)) == ("b", 5)
     with pytest.raises(hq.QuotedStringError) as caught:
         hq.scan_quoted_string("xyz", HostileInt(1))
     assert type(caught.value.offset) is int
@@ -149,5 +156,9 @@ class _FullDisk(io.StringIO):
 
 def test_a_write_error_is_reported_without_a_traceback(monkeypatch: pytest.MonkeyPatch) -> None:
     err = io.StringIO()
+    silenced: list[bool] = []
+    monkeypatch.setattr(cli_module, "_silence_stdout", lambda: silenced.append(True))
     assert _cli(monkeypatch, "quote", "a", stdout=_FullDisk(), stderr=err) == 1
+    # The unwritten bytes must not be flushed again at exit, which would fail with a traceback.
+    assert silenced == [True]
     assert err.getvalue() == f"httpquoted: cannot write the output (errno {errno.ENOSPC})\n"
