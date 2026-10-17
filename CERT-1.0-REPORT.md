@@ -192,6 +192,17 @@ Result: 66 killed. P08 survived and is equivalent: a separator longer than one
 character is never a member of the one-character set `FIELD_TEXT`, so the next check
 refuses it with the same error; the length test is kept for readability.
 
+## Supported Pythons (item 10), author run
+
+The interpreters on this PC were staged without their site-packages, together with the
+wheel and the unpacked sdist (its `src` removed, the fetched sources added), and run under
+an auto:cpu turn on the laptop (the turns never landed on this PC): for CPython 3.10.19,
+3.11.5, 3.12.12, 3.13.2, 3.14.2 and 3.14.2 free-threaded, a fresh venv with the 1.0.0
+wheel, the whole sdist suite against the installed package (imported from
+site-packages), exit 0 on each, only the two opt-in end-to-end modules skipped. CPython
+3.8.20 and 3.9.25 are below `requires-python`: pip refuses the wheel on both
+("requires a different Python").
+
 ## Independent QA lenses (item 19)
 
 Each lens was a fresh reviewer that read the certification rules and CERT-1.0.md first,
