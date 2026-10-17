@@ -5,7 +5,15 @@ from __future__ import annotations
 import re
 from typing import AnyStr
 
-from ._chars import FIELD_TEXT, NOT_FIELD_TEXT, QuotedStringError, as_text, describe, like
+from ._chars import (
+    FIELD_TEXT,
+    NOT_FIELD_TEXT,
+    QuotedStringError,
+    as_text,
+    check_flag,
+    describe,
+    like,
+)
 from ._scan import scan_comment, scan_quoted_string
 
 _RESERVED = frozenset('"\\()')
@@ -32,7 +40,19 @@ def split_list(
     content (CR, LF, NUL, other controls, DEL), a quoted-string or comment that breaks
     its grammar or never ends, and a stray ")" when `comments=True`. The grammar of
     each element belongs to the field and is left to the caller: `"a"b` is one element.
+    A separator that is not one field character other than DQUOTE, backslash, "(" or
+    ")" raises `ValueError`.
+
+    >>> from httpquoted import split_list
+    >>> split_list('gzip, "a,b", , br')
+    ['gzip', '"a,b"', 'br']
+    >>> split_list('text/plain; charset="utf-8"', separator=";")
+    ['text/plain', 'charset="utf-8"']
+    >>> split_list("1.0 fred (proxy, eu), 1.1 example.net", comments=True)
+    ['1.0 fred (proxy, eu)', '1.1 example.net']
     """
+    check_flag("comments", comments)
+    check_flag("strict", strict)
     separator = check_separator(separator)
     text = as_text(header)
     if strict:

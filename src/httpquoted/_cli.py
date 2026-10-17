@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
+import os
 import sys
 from collections.abc import Sequence
 
@@ -66,18 +68,40 @@ def _write_line(line: str) -> None:
     buffer.flush()
 
 
+def _octets(arg: str) -> str:
+    # POSIX hands arguments over as bytes decoded with the file system codec: recover those
+    # octets so an argument reads as ISO-8859-1, like standard input. Windows passes text.
+    if sys.platform == "win32":
+        return arg
+    return os.fsencode(arg).decode("latin-1")
+
+
+def _silence_stdout() -> None:
+    # The reader went away: point stdout at the null device so the final flush at exit
+    # cannot fail again and print a traceback.
+    with contextlib.suppress(OSError, ValueError, AttributeError):
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+
+
 def main(argv: Sequence[str] | None = None) -> int:
-    """Entry point of the `httpquoted` command; returns the exit status."""
+    """Entry point of the `httpquoted` command; returns the exit status.
+
+    0 when every value was written, 1 when one is rejected or the output closes early,
+    2 for a usage error and 130 when interrupted.
+    """
     parser = _parser()
     args = parser.parse_args(argv)
+    if argv is None:
+        args.values = [_octets(value) for value in args.values]
+        if args.command == "split":
+            args.separator = _octets(args.separator)
     if args.command == "split":
         try:
             check_separator(args.separator)
         except ValueError as error:
             parser.error(str(error))
-    values = args.values or _read_lines()
     try:
-        for value in values:
+        for value in args.values or _read_lines():
             for line in _convert(args, value):
                 _write_line(line)
     except QuotedStringError as error:
@@ -87,4 +111,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         char = error.object[error.start]
         print(f"httpquoted: U+{ord(char):04X} is not an ISO-8859-1 octet", file=sys.stderr)
         return 1
+    except BrokenPipeError:
+        _silence_stdout()
+        return 1
+    except KeyboardInterrupt:
+        return 130
     return 0

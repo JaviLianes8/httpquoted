@@ -28,16 +28,38 @@ NOT_ASCII_TEXT = re.compile(r"[^\t\x20-\x7e]")
 
 
 class QuotedStringError(ValueError):
-    """A value breaks the quoted-string, comment or token grammar of RFC 9110.
+    r"""A value breaks the quoted-string, comment or token grammar of RFC 9110.
 
     `reason` names the broken rule and `offset` is the index of the offending character
-    in the text that was being read or written.
+    in the text that was being read or written. The message never quotes the input.
+
+    >>> from httpquoted import QuotedStringError, quote
+    >>> try:
+    ...     quote("a\nb")
+    ... except QuotedStringError as error:
+    ...     print(error.reason, error.offset, isinstance(error, ValueError))
+    U+000A is not allowed 1 True
     """
 
     def __init__(self, reason: str, offset: int) -> None:
         super().__init__(f"{reason} at offset {offset}")
         self.reason = reason
         self.offset = offset
+
+    def __reduce__(self) -> tuple[type[QuotedStringError], tuple[str, int]]:
+        return type(self), (self.reason, self.offset)
+
+
+def type_name(value: object) -> str:
+    """The type name of a value for an error message, at most 40 characters."""
+    name = getattr(type(value), "__name__", None)
+    return name[:40] if isinstance(name, str) else "object"
+
+
+def check_flag(name: str, value: object) -> None:
+    """Raise TypeError unless an option is a real bool."""
+    if not isinstance(value, bool):
+        raise TypeError(f"{name} must be a bool, got {type_name(value)}")
 
 
 def describe(char: str) -> str:
@@ -61,7 +83,7 @@ def as_text(value: str | bytes) -> str:
         return value.decode("latin-1")
     if isinstance(value, str):
         return value
-    raise TypeError(f"expected str or bytes, got {type(value).__name__}")
+    raise TypeError(f"expected str or bytes, got {type_name(value)}")
 
 
 def like(text: str, original: AnyStr) -> AnyStr:

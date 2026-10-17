@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "httpquoted"
-version = "0.2.0"
+version = "1.0.0"
 description = "Strict, typed and zero-dependency codec for HTTP quoted-strings, comments and tokens (RFC 9110): safe quoting, strict parsing, scanners and quote-aware list splitting"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -13,7 +13,7 @@ license-files = ["LICENSE"]
 authors = [{ name = "Javier Lianes", email = "javier@lianes8studio.com" }]
 keywords = ["http", "header", "quoted-string", "quote", "unquote", "comment", "token", "field-value", "list", "parser", "rfc9110", "rfc7230"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
@@ -38,7 +38,7 @@ httpquoted = "httpquoted._cli:main"
 
 [project.urls]
 Homepage = "https://lianes8studio.com"
-Repository = "https://github.com/JaviLianes8/httpquoted"
+Source = "https://github.com/JaviLianes8/httpquoted"
 Issues = "https://github.com/JaviLianes8/httpquoted/issues"
 Changelog = "https://github.com/JaviLianes8/httpquoted/blob/main/CHANGELOG.md"
 LinkedIn = "https://www.linkedin.com/in/jlianes/"
