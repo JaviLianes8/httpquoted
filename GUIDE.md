@@ -70,14 +70,16 @@ one element.
 Every function takes `str` or `bytes` and returns the same type. Bytes are read as
 ISO-8859-1, where each octet is the code point of the same value, so obs-text
 round-trips unchanged and every offset is an octet offset. `bytearray`, `memoryview` and
-other types raise `TypeError`.
+other types raise `TypeError`. The signatures use the `AnyStr` type variable, so a type
+checker wants a value known to be `str` or known to be `bytes`; narrow a `str | bytes`
+value with `isinstance` before the call.
 
 ## Errors
 
 | Error | When |
 |---|---|
 | `QuotedStringError` | a value breaks the grammar; a subclass of `ValueError` |
-| `TypeError` | the value is not `str` or `bytes`; `strict`, `ascii_only` or `comments` is not a `bool`; `start` is not an `int` |
+| `TypeError` | the value or the separator is not `str` or `bytes`; `strict`, `ascii_only` or `comments` is not a `bool`; `start` is not an `int` |
 | `ValueError` | `split_list` was given a separator that cannot split a field value |
 
 `QuotedStringError` carries `reason` and `offset`, and its message is
@@ -95,7 +97,7 @@ never reaches a log through an error. It survives pickling. The reasons are:
 | `unterminated quoted-string` (or `comment`) | the opening quote or parenthesis |
 | `text after the closing quote` (or `parenthesis`) | the first character after it |
 | `not a token or a quoted-string` | the first character that is not a token character |
-| `a quoted-string must start with "` (or `comment`, `(`) | the `start` given to a scanner |
+| `a quoted-string must start with "` (or `comment`, `(`) | the `start` given to a scanner, or 0 for strict `unquote_comment` |
 | `unbalanced )` | a stray `)` in `split_list(..., comments=True, strict=True)` |
 
 ## Command line

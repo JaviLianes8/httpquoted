@@ -1,7 +1,5 @@
 """Typed codec for the HTTP quoted-string and comment primitives (RFC 9110)."""
 
-from __future__ import annotations
-
 from ._chars import QuotedStringError
 from ._comment import quote_comment, unquote_comment
 from ._quote import quote, quote_if_needed, unquote

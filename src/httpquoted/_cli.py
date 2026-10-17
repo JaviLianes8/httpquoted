@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import errno
 import os
 import sys
 from collections.abc import Sequence
@@ -118,7 +119,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         char = error.object[error.start]
         print(f"httpquoted: U+{ord(char):04X} is not an ISO-8859-1 octet", file=sys.stderr)
         return 1
-    except BrokenPipeError:
+    except OSError as error:
+        # The reader closed the output: POSIX reports EPIPE, Windows reports EINVAL.
+        if not isinstance(error, BrokenPipeError) and error.errno != errno.EINVAL:
+            raise
         _silence_stdout()
         return 1
     except KeyboardInterrupt:

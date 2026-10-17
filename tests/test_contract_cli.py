@@ -113,3 +113,33 @@ def test_arguments_passed_to_main_are_used_as_given(monkeypatch: pytest.MonkeyPa
     buffer = out.buffer
     assert isinstance(buffer, io.BytesIO)
     assert buffer.getvalue() == b'"caf\xe9"\n'
+
+
+def test_a_reader_that_closes_early_gets_exit_1_without_a_traceback(tmp_path: Path) -> None:
+    source = tmp_path / "big.txt"
+    source.write_bytes(b"a," * 400_000 + b"\n")
+    code = f"import sys; sys.path.insert(0, {SRC!r}); from httpquoted._cli import main; "
+    code += "sys.exit(main())"
+    with source.open("rb") as stdin:
+        process = subprocess.Popen(
+            [sys.executable, "-c", code, "split"],
+            stdin=stdin,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        assert process.stdout is not None and process.stderr is not None
+        assert process.stdout.readline() == b"a\n"
+        process.stdout.close()
+        error = process.stderr.read()
+        assert process.wait(timeout=60) == 1
+        process.stderr.close()
+    assert error == b""
+
+
+def test_other_os_errors_are_not_swallowed(monkeypatch: pytest.MonkeyPatch) -> None:
+    def broken() -> list[str]:
+        raise PermissionError(13, "denied")
+
+    monkeypatch.setattr(_cli, "_read_lines", broken)
+    with pytest.raises(PermissionError):
+        main(["quote"])

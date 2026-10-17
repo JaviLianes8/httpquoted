@@ -17,12 +17,15 @@ options and exit statuses. Results on valid input are identical to 0.2.0.
 - The `strict`, `ascii_only` and `comments` options must be real `bool` values; anything
   else raises `TypeError` (0.2.0 used the truth value, so `strict="no"` meant strict).
 - `QuotedStringError` survives pickling (0.2.0 raised `TypeError` when unpickled).
-- Public names report `httpquoted` as their module instead of a private module.
+- Public names report `httpquoted` as their module instead of a private module. One
+  side effect: `inspect.getsource(httpquoted.QuotedStringError)` can no longer find the
+  class source (functions are not affected).
 - A `TypeError` message names at most 40 characters of the offending type name.
 - Command line: on POSIX systems each argument is read back as the octets it was given
   (ISO-8859-1, like standard input) instead of as file system text, so a UTF-8 argument
   is written out unchanged; an interrupt exits with status 130 and a closed output
-  (`| head`) with status 1, both without a traceback. The help names the values `VALUE`
+  (`| head`, reported as EPIPE on POSIX and EINVAL on Windows) with status 1, both
+  without a traceback. The help names the values `VALUE`
   and the separator `SEP`.
 - The sdist is built from an explicit file list, so a local virtual environment or
   scratch file next to the sources is never packed.
@@ -40,7 +43,7 @@ options and exit statuses. Results on valid input are identical to 0.2.0.
 - Code that compared `QuotedStringError.__module__` or a function's `__module__` with
   a private module name now sees `httpquoted`.
 
-## [0.2.0]
+## [0.2.0] - 2026-10-16
 
 ### Added
 
@@ -65,7 +68,7 @@ options and exit statuses. Results on valid input are identical to 0.2.0.
 - Every function raises `TypeError` for input that is neither `str` nor `bytes`;
   `is_token(None)` returned `False` before.
 
-## [0.1.0]
+## [0.1.0] - 2026-10-12
 
 - First release: `quote`, `unquote`, `is_token` and `split_list` for the HTTP
   quoted-string primitive (RFC 9110).
