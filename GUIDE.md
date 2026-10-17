@@ -72,7 +72,10 @@ ISO-8859-1, where each octet is the code point of the same value, so obs-text
 round-trips unchanged and every offset is an octet offset. `bytearray`, `memoryview` and
 other types raise `TypeError`. The signatures use the `AnyStr` type variable, so a type
 checker wants a value known to be `str` or known to be `bytes`; narrow a `str | bytes`
-value with `isinstance` before the call.
+value with `isinstance` before the call. A subclass of `str` or `bytes` is read as its
+plain value: none of its overridden methods are called. Lenient `unquote`,
+`unquote_comment` and `quote_if_needed` return the very object they were given when they
+have nothing to change.
 
 ## Errors
 
@@ -97,7 +100,7 @@ never reaches a log through an error. It survives pickling. The reasons are:
 | `unterminated quoted-string` (or `comment`) | the opening quote, or the outermost opening parenthesis |
 | `text after the closing quote` (or `parenthesis`) | the first character after it |
 | `not a token or a quoted-string` | the first character that is not a token character |
-| `a quoted-string must start with "` (or `comment`, `(`) | the `start` given to a scanner, or 0 for strict `unquote_comment` |
+| `a quoted-string must start with "` (or `comment`, `(`) | the `start` given to a scanner, moved to 0 or to the length of the text when it lies outside, or 0 for strict `unquote_comment` |
 | `unbalanced )` | a stray `)` in `split_list(..., comments=True, strict=True)` |
 
 ## Command line
@@ -111,13 +114,14 @@ httpquoted split [-h] [--separator SEP] [--comments] [--strict] [VALUE ...]
 Values come from the arguments, or one per line from standard input. Standard input and
 output are read and written as ISO-8859-1, so octets pass through unchanged. On POSIX
 systems each argument is read back as the octets it was given; on Windows arguments are
-text and each character up to U+00FF is written as that octet. `python -m httpquoted`
-works the same way.
+text and each character up to U+00FF is written as that octet. A closed standard input
+reads as no values; with standard error closed the reasons are dropped rather than
+mixed into the output. `python -m httpquoted` works the same way.
 
 | Exit status | Meaning |
 |---|---|
 | 0 | every value was written |
-| 1 | a value was rejected (the reason goes to standard error), or the output closed early |
+| 1 | a value was rejected (the reason goes to standard error), the output closed early, or it could not be written |
 | 2 | usage error |
 | 130 | interrupted |
 

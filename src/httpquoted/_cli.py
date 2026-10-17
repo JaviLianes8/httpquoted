@@ -55,6 +55,8 @@ def _convert(args: argparse.Namespace, value: str) -> list[str]:
 
 def _read_lines() -> list[str]:
     # Field values are octets: read standard input as ISO-8859-1, never the locale codec.
+    if sys.stdin is None:  # started with standard input closed
+        return []
     buffer = getattr(sys.stdin, "buffer", None)
     data = buffer.read().decode("latin-1") if buffer is not None else sys.stdin.read()
     lines = [line.removesuffix("\r") for line in data.split("\n")]
@@ -65,7 +67,20 @@ class _OutputClosed(Exception):
     """The reader of standard output went away."""
 
 
+class _OutputFailed(Exception):
+    """Standard output refused the data for another reason (a full disk, say)."""
+
+
+def _report(message: str) -> None:
+    # With standard error closed, print() would fall back to standard output and mix the
+    # message into the data, so it is dropped instead.
+    if sys.stderr is not None:
+        print(f"httpquoted: {message}", file=sys.stderr)
+
+
 def _write_line(line: str) -> None:
+    if sys.stdout is None:  # started with standard output closed
+        raise _OutputClosed
     try:
         buffer = getattr(sys.stdout, "buffer", None)
         if buffer is None:
@@ -78,7 +93,7 @@ def _write_line(line: str) -> None:
         # A closed pipe is EPIPE on POSIX and EINVAL on Windows.
         if isinstance(error, BrokenPipeError) or error.errno == errno.EINVAL:
             raise _OutputClosed from error
-        raise
+        raise _OutputFailed(error.errno) from error
 
 
 def _octets(arg: str) -> str:
@@ -123,13 +138,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             for line in _convert(args, value):
                 _write_line(line)
     except QuotedStringError as error:
-        print(f"httpquoted: {error}", file=sys.stderr)
+        _report(str(error))
         return 1
     except UnicodeEncodeError as error:
-        char = error.object[error.start]
-        print(f"httpquoted: U+{ord(char):04X} is not an ISO-8859-1 octet", file=sys.stderr)
+        _report(f"U+{ord(error.object[error.start]):04X} is not an ISO-8859-1 octet")
         return 1
     except _OutputClosed:
+        _silence_stdout()
+        return 1
+    except _OutputFailed as error:
+        _report(f"cannot write the output (errno {error.args[0]})")
         _silence_stdout()
         return 1
     except KeyboardInterrupt:

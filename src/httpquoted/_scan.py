@@ -37,7 +37,7 @@ def scan_quoted_string(text: AnyStr, start: int = 0, *, strict: bool = False) ->
     """
     check_flag("strict", strict)
     source = as_text(text)
-    _expect(source, start, '"', "quoted-string")
+    start = _expect(source, start, '"', "quoted-string")
     value, end = _scan(source, start, QDTEXT_RUN if strict else LOOSE_QUOTED_RUN, strict, 0)
     return like(value, text), end
 
@@ -56,16 +56,20 @@ def scan_comment(text: AnyStr, start: int = 0, *, strict: bool = False) -> tuple
     """
     check_flag("strict", strict)
     source = as_text(text)
-    _expect(source, start, "(", "comment")
+    start = _expect(source, start, "(", "comment")
     value, end = _scan(source, start, CTEXT_RUN if strict else LOOSE_COMMENT_RUN, strict, 1)
     return like(value, text), end
 
 
-def _expect(source: str, start: int, opener: str, rule: str) -> None:
+def _expect(source: str, start: int, opener: str, rule: str) -> int:
     if isinstance(start, bool) or not isinstance(start, int):
         raise TypeError(f"start must be an int, got {type_name(start)}")
+    # An exact copy, so an int subclass cannot steer the scan or the error message.
+    start = int.__int__(start)
     if not 0 <= start < len(source) or source[start] != opener:
-        raise QuotedStringError(f"a {rule} must start with {opener}", start)
+        offset = min(max(start, 0), len(source))
+        raise QuotedStringError(f"a {rule} must start with {opener}", offset)
+    return start
 
 
 def _scan(

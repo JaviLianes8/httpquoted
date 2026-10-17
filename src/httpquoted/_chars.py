@@ -52,8 +52,9 @@ class QuotedStringError(ValueError):
 
 def type_name(value: object) -> str:
     """The type name of a value for an error message, at most 40 characters."""
-    name = getattr(type(value), "__name__", None)
-    return name[:40] if isinstance(name, str) else "object"
+    # The name slot of the type itself: a metaclass property cannot replace or inflate it.
+    name = type.__dict__["__name__"].__get__(type(value))
+    return str.__getitem__(name, slice(0, 40)) if isinstance(name, str) else "object"
 
 
 def check_flag(name: str, value: object) -> None:
@@ -79,10 +80,11 @@ def check_field_text(value: str, *, ascii_only: bool = False) -> None:
 
 def as_text(value: str | bytes) -> str:
     """Read bytes as ISO-8859-1, where every octet maps to the code point of the same value."""
+    # Unbound base methods give an exact str, so a subclass cannot override what is read.
     if isinstance(value, bytes):
-        return value.decode("latin-1")
+        return bytes.decode(value, "latin-1")
     if isinstance(value, str):
-        return value
+        return str.__str__(value)
     raise TypeError(f"expected str or bytes, got {type_name(value)}")
 
 

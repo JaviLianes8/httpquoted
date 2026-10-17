@@ -94,7 +94,7 @@ def test_a_type_name_in_a_message_is_bounded() -> None:
         __name__ = property(lambda cls: 5)
 
     odd = Meta("Odd", (), {})()
-    with pytest.raises(TypeError, match=r"got object$"):
+    with pytest.raises(TypeError, match=r"got Odd$"):
         hq.is_token(odd)
 
 
