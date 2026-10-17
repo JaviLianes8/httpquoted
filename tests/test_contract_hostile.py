@@ -112,6 +112,8 @@ def test_a_metaclass_cannot_inflate_or_break_a_type_name() -> None:
         def __getitem__(self, key: object) -> str:
             return "X" * 1_000_000
 
+        __str__ = _boom
+
     meta = type("Meta", (type,), {"__name__": property(_boom)})
     odd = meta("Odd", (), {})()
     with pytest.raises(TypeError, match=r"got Odd$"):
