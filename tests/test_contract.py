@@ -53,3 +53,8 @@ def test_options_are_keyword_only() -> None:
         for parameter in inspect.signature(function).parameters.values():
             if parameter.default is not inspect.Parameter.empty and parameter.name != "start":
                 assert parameter.kind is inspect.Parameter.KEYWORD_ONLY, (name, parameter)
+
+
+def test_the_module_exposes_nothing_public_beyond_all() -> None:
+    names = [name for name in dir(httpquoted) if not name.startswith("_")]
+    assert sorted(names) == sorted(httpquoted.__all__)

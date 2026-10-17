@@ -143,3 +143,24 @@ def test_other_os_errors_are_not_swallowed(monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.setattr(_cli, "_read_lines", broken)
     with pytest.raises(PermissionError):
         main(["quote"])
+
+
+def test_an_einval_while_reading_input_is_not_taken_for_a_closed_output(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def broken() -> list[str]:
+        raise OSError(22, "invalid")
+
+    monkeypatch.setattr(_cli, "_read_lines", broken)
+    with pytest.raises(OSError):
+        main(["quote"])
+
+
+class _InvalidPipe(io.StringIO):
+    def write(self, text: str) -> int:
+        raise OSError(22, "invalid")
+
+
+def test_an_einval_on_output_is_a_closed_output(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(sys, "stdout", _InvalidPipe())
+    assert main(["quote", "a"]) == 1

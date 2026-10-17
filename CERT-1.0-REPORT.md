@@ -191,3 +191,15 @@ time, file restored after; baseline green before.
 Result: 66 killed. P08 survived and is equivalent: a separator longer than one
 character is never a member of the one-character set `FIELD_TEXT`, so the next check
 refuses it with the same error; the length test is kept for readability.
+
+## Independent QA lenses (item 19)
+
+Each lens was a fresh reviewer that read the certification rules and CERT-1.0.md first,
+ran the code rather than only reading it, reported only to the author and posted nothing
+to GitHub. Lenses ran one at a time. Later rounds were bounded to confirming earlier
+findings plus one sweep of at most 40 mutations on the code changed since.
+
+| Lens | Round | Head | Verdict | Findings and outcome |
+| --- | --- | --- | --- | --- |
+| a. API and docs | 1 | e6f1ea9 | FAIL | 390,918 seeded calls against the real 0.2.0: every difference listed in the CHANGELOG; every docstring, README and GUIDE claim run (Werkzeug, h11, urllib, email, WHATWG, Node rechecked with its own scripts); strict consumer clean. Finding: on Windows a closed output raised `OSError(EINVAL)`, not `BrokenPipeError`, so `split \| head -1` exited 120 with a traceback. Low: `inspect.getsource` of the error class fails after the module rename (documented), a `str \| bytes` value is refused by `AnyStr` under mypy (documented), `annotations` leaked from `__init__`; nits on GUIDE rows and CHANGELOG dates. Fixed in e3a9166 with a real-subprocess contract |
+| a | 2 | e3a9166 | PASS | all confirmed; Windows repro exits 1 with empty stderr (local 3.13, installed entry point on 3.14); 17 mutants on the changed code, 15 killed, 1 equivalent, 1 (the `__future__` import back) closed by `test_the_module_exposes_nothing_public_beyond_all`; nit: the handler also covered reading stdin, narrowed to the writes with two more contracts |

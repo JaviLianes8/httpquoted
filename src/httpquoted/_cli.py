@@ -61,14 +61,24 @@ def _read_lines() -> list[str]:
     return lines[:-1] if lines and not lines[-1] else lines
 
 
+class _OutputClosed(Exception):
+    """The reader of standard output went away."""
+
+
 def _write_line(line: str) -> None:
-    buffer = getattr(sys.stdout, "buffer", None)
-    if buffer is None:
-        sys.stdout.write(line + "\n")
-        return
-    sys.stdout.flush()
-    buffer.write(line.encode("latin-1") + b"\n")
-    buffer.flush()
+    try:
+        buffer = getattr(sys.stdout, "buffer", None)
+        if buffer is None:
+            sys.stdout.write(line + "\n")
+            return
+        sys.stdout.flush()
+        buffer.write(line.encode("latin-1") + b"\n")
+        buffer.flush()
+    except OSError as error:
+        # A closed pipe is EPIPE on POSIX and EINVAL on Windows.
+        if isinstance(error, BrokenPipeError) or error.errno == errno.EINVAL:
+            raise _OutputClosed from error
+        raise
 
 
 def _octets(arg: str) -> str:
@@ -119,10 +129,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         char = error.object[error.start]
         print(f"httpquoted: U+{ord(char):04X} is not an ISO-8859-1 octet", file=sys.stderr)
         return 1
-    except OSError as error:
-        # The reader closed the output: POSIX reports EPIPE, Windows reports EINVAL.
-        if not isinstance(error, BrokenPipeError) and error.errno != errno.EINVAL:
-            raise
+    except _OutputClosed:
         _silence_stdout()
         return 1
     except KeyboardInterrupt:
