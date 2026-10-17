@@ -3,18 +3,13 @@
 from __future__ import annotations
 
 import re
-import string
 from typing import AnyStr
 
-# tchar: any VCHAR except the delimiters DQUOTE and "(),/:;<=>?@[\]{}" (section 5.6.2).
-TCHAR = frozenset(string.ascii_letters + string.digits + "!#$%&'*+-.^_`|~")
 VCHAR = frozenset(chr(code) for code in range(0x21, 0x7F))
 OBS_TEXT = frozenset(chr(code) for code in range(0x80, 0x100))
 # What may follow a backslash, and what a sender may put between the quotes once DQUOTE
 # and backslash are escaped: HTAB, SP, VCHAR and obs-text.
 FIELD_TEXT = frozenset("\t ") | VCHAR | OBS_TEXT
-QDTEXT = FIELD_TEXT - frozenset('"\\')
-CTEXT = FIELD_TEXT - frozenset("()\\")
 
 # Runs of plain text. A single character class with `*` never backtracks, so every scan
 # stays linear however hostile the input is.
