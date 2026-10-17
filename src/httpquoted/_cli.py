@@ -80,7 +80,12 @@ def _silence_stdout() -> None:
     # The reader went away: point stdout at the null device so the final flush at exit
     # cannot fail again and print a traceback.
     with contextlib.suppress(OSError, ValueError, AttributeError):
-        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+        target = sys.stdout.fileno()
+        null = os.open(os.devnull, os.O_WRONLY)
+        try:
+            os.dup2(null, target)
+        finally:
+            os.close(null)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
